@@ -73,7 +73,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: 🚀 Run UI tests on ${{ matrix.browser }}
-        run: npx playwright test src/tests --grep-invert "@api" --browser ${{ matrix.browser }}
+        run: npx playwright test src/tests --grep-invert "@api" --project=${{ matrix.browser }}
 
       - name: 📄 Upload per‑browser reports
         if: always()
