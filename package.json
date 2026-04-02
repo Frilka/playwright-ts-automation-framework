@@ -1,0 +1,43 @@
+{
+  "name": "playwright-ts-automation-framework",
+  "version": "1.0.0",
+  "description": "PET test automation framework (Playwright & TypeScript)",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:ui": "npx playwright test --ui",
+    "test:debug": "npx playwright test --debug",
+    "codegen": "npx playwright codegen [the-internet.herokuapp.com](https://the-internet.herokuapp.com)",
+    "format": "npx prettier --write .",
+    "lint": "npx eslint . --ext .ts",
+    "report": "npx playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "automation",
+    "e2e",
+    "testing-framework",
+    "ui-testing"
+  ],
+  "author": "Yuliia Frolova",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.12.0",
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.1",
+    "prettier": "^3.2.5",
+    "eslint": "^8.56.0",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Frilka/playwright-ts-automation-framework.git"
+  },
+  "homepage": "https://github.com/Frilka/playwright-ts-automation-framework#readme"
+}
