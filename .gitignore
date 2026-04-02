@@ -19,6 +19,3 @@ dist/
 .DS_Store
 .idea/
 .vscode/
-
-# Package lock
-package-lock.json
