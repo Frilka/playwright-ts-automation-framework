@@ -28,7 +28,7 @@ jobs:
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: 📦 Install dependencies
         run: npm ci
@@ -64,7 +64,7 @@ jobs:
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: 📦 Install dependencies
         run: npm ci
@@ -82,33 +82,60 @@ jobs:
           name: report-${{ matrix.browser }}
           path: playwright-report/
 
+  cleanup-old-reports:
+    name: Cleanup old reports (keep 7 days)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v4
+      - name: 🧹 Remove reports older than 15 days
+        run: |
+          find reports -maxdepth 1 -type d -mtime +15 -not -path "reports" -exec rm -rf {} +
+          echo "Old reports deleted."
+      - name: ✅ Commit cleanup (no failure if nothing changed)
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add reports || true
+          git commit -m "ci: cleanup old reports" || echo "No old reports to delete."
+      - name: 🔄 Push cleanup changes
+        run: git push
+  
   # ============================================================
   # 3️⃣  Merge HTML reports and prepare for publishing
   # ============================================================
   merge-report:
     name: Merge Playwright reports
     runs-on: ubuntu-latest
-    needs: ui-tests
+    needs: [ui-tests, cleanup-old-reports]
     if: always()
-
+    outputs:
+        report_dir: ${{ steps.setdir.outputs.name }}
     steps:
-      - name: 🧾 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: ⬇️ Download all browser reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: report-*
-          merge-multiple: true
-          path: playwright-report
-
-      - name: 🔧 Merge Playwright reports
-        run: npx playwright merge-reports --reporter=html playwright-report playwright-report
-
-      - name: 📦 Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: playwright-report
+    - name: 🧾 Checkout repository
+      uses: actions/checkout@v4
+    - name: 📅 Create unique report directory name
+      id: setdir
+      run: |
+        SHORT_SHA="${GITHUB_SHA::7}"
+        DIR_NAME="reports/$(date +'%Y-%m-%d_%H-%M')_${SHORT_SHA}"
+        echo "name=${DIR_NAME}" >> $GITHUB_OUTPUT
+    - name: ⬇️ Download all browser reports
+      uses: actions/download-artifact@v4
+      with:
+        pattern: report-*
+        merge-multiple: true
+        path: playwright-report
+    - name: 🔧 Merge Playwright reports
+      run: npx playwright merge-reports --reporter=html playwright-report
+    - name: 📦 Add timestamped folder
+      run: |
+        mkdir -p ${{ steps.setdir.outputs.name }}
+        mv playwright-report/* ${{ steps.setdir.outputs.name }}
+    - name: 📦 Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: reports
 
   # ============================================================
   # 4️⃣  Deploy merged HTML report to GitHub Pages
