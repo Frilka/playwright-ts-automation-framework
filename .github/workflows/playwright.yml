@@ -90,8 +90,12 @@ jobs:
         uses: actions/checkout@v4
       - name: 🧹 Remove reports older than 15 days
         run: |
-          find reports -maxdepth 1 -type d -mtime +15 -not -path "reports" -exec rm -rf {} +
-          echo "Old reports deleted."
+          if [ -d "reports" ]; then
+            find reports -maxdepth 1 -type d -mtime +15 -not -path "reports" -exec rm -rf {} +
+            echo "Old reports deleted."
+          else
+            echo "ℹ️ No 'reports' directory found — skipping cleanup."
+          fi
       - name: ✅ Commit cleanup (no failure if nothing changed)
         run: |
           git config --global user.name 'github-actions[bot]'
