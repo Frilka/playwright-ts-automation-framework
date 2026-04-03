@@ -20,6 +20,7 @@ jobs:
       FORM_AUTH_USER: ${{ secrets.FORM_AUTH_USER }}
       FORM_AUTH_PASS: ${{ secrets.FORM_AUTH_PASS }}
       BASE_URL: ${{ secrets.BASE_URL }}
+      REPORT_NAME: api
 
     steps:
       - name: 🧾 Checkout repository
@@ -39,6 +40,19 @@ jobs:
       - name: 🚀 Run API tests (single browser)
         run: npx playwright test src/tests/api --project=chromium
 
+      - name: 📦 Package API reports
+        run: |
+            mkdir -p combined/api
+            mv playwright-report combined/api/playwright-report
+            mv blob-report combined/api/blob-report
+      - name: 📄 Upload API test report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: report-api
+            path: combined/api
+            if-no-files-found: error
+
   # ============================================================
   # 2️⃣  Run UI tests after API succeeds (matrix of browsers)
   # ============================================================
@@ -56,6 +70,7 @@ jobs:
       FORM_AUTH_USER: ${{ secrets.FORM_AUTH_USER }}
       FORM_AUTH_PASS: ${{ secrets.FORM_AUTH_PASS }}
       BASE_URL: ${{ secrets.BASE_URL }}
+      REPORT_NAME: ${{ matrix.browser }}
 
     steps:
       - name: 🧾 Checkout repository
@@ -75,12 +90,19 @@ jobs:
       - name: 🚀 Run UI tests on ${{ matrix.browser }}
         run: npx playwright test src/tests --grep-invert "@api" --project=${{ matrix.browser }}
 
+      - name: 📦 Package per‑browser reports
+        run: |
+            mkdir -p combined/${{ matrix.browser }}
+            mv playwright-report combined/${{ matrix.browser }}/playwright-report
+            mv blob-report combined/${{ matrix.browser }}/blob-report
+
       - name: 📄 Upload per‑browser reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: report-${{ matrix.browser }}
-          path: playwright-report/
+          path: combined/${{ matrix.browser }}/
+          if-no-files-found: warn
 
   # ============================================================
   # 3️⃣  Merge HTML reports and prepare for publishing
@@ -88,7 +110,7 @@ jobs:
   merge-report:
     name: Merge Playwright reports
     runs-on: ubuntu-latest
-    needs: ui-tests
+    needs: api-tests
     if: always()
     outputs:
         report_dir: ${{ steps.setdir.outputs.name }}
@@ -101,14 +123,17 @@ jobs:
         SHORT_SHA="${GITHUB_SHA::7}"
         DIR_NAME="reports/$(date +'%Y-%m-%d_%H-%M')_${SHORT_SHA}"
         echo "name=${DIR_NAME}" >> $GITHUB_OUTPUT
-    - name: ⬇️ Download all browser reports
+
+    - name: ⬇️ Download all reports (API + UI)
       uses: actions/download-artifact@v4
       with:
         pattern: report-*
         merge-multiple: true
-        path: playwright-report
+        path: merged-results
+
     - name: 🔧 Merge Playwright reports
-      run: npx playwright merge-reports --reporter=html playwright-report
+      run: npx playwright merge-reports --reporter=html merged-results/blob-report
+
     - name: 📦 Add timestamped folder
       run: |
         mkdir -p ${{ steps.setdir.outputs.name }}
@@ -133,20 +158,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-    # Download previously deployed Pages artifact (if any)
-    - name: ⬇️ Download previous site content
-      uses: actions/download-pages-artifact@v3
-      id: previous
-      continue-on-error: true
-      with:
-        path: site
-    # Bring in new reports artifact
-    - name: ⬇️ Download new reports artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: github-pages
-        path: site
-    # 🧹 Remove reports older than 7 days locally (no git)
+    # 🧹 Remove reports older than 15 days locally (no git)
     - name: 🧹 Cleanup old reports before deploy
       run: |
         if [ -d "site/reports" ]; then

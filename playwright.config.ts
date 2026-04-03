@@ -15,7 +15,12 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  reporter: [['html', { open: 'never' }]],
+  reporter: [
+    ['list'], 
+    ['html', { open: 'never' }],
+    ['blob', { fileName: `report_${process.env.REPORT_NAME || 'default'}.zip`}],
+  ],
+  outputDir: 'test-results/',
    /* Configure projects for major browsers */
   projects: [
     {
@@ -53,11 +58,4 @@ export default defineConfig({
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
 });
