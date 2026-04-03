@@ -39,6 +39,19 @@ jobs:
       - name: 🚀 Run API tests (single browser)
         run: npx playwright test src/tests/api --project=chromium
 
+      - name: 📦 Package API reports
+        run: |
+            mkdir -p combined/api
+            mv playwright-report combined/api/playwright-report
+            mv json-report combined/api/json-report
+      - name: 📄 Upload API test report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: report-api
+            path: combined/api
+            if-no-files-found: error
+
   # ============================================================
   # 2️⃣  Run UI tests after API succeeds (matrix of browsers)
   # ============================================================
@@ -75,14 +88,18 @@ jobs:
       - name: 🚀 Run UI tests on ${{ matrix.browser }}
         run: npx playwright test src/tests --grep-invert "@api" --project=${{ matrix.browser }}
 
+      - name: 📦 Package per‑browser reports
+        run: |
+            mkdir -p combined/${{ matrix.browser }}
+            mv playwright-report combined/${{ matrix.browser }}/playwright-report
+            mv json-report combined/${{ matrix.browser }}/json-report
+
       - name: 📄 Upload per‑browser reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: report-${{ matrix.browser }}
-          path: |
-            playwright-report/
-            json-report/
+          path: combined/${{ matrix.browser }}/
           if-no-files-found: warn
 
   # ============================================================
@@ -105,17 +122,15 @@ jobs:
         DIR_NAME="reports/$(date +'%Y-%m-%d_%H-%M')_${SHORT_SHA}"
         echo "name=${DIR_NAME}" >> $GITHUB_OUTPUT
 
-    - name: ⬇️ Download all browser reports
+    - name: ⬇️ Download all reports (API + UI)
       uses: actions/download-artifact@v4
       with:
         pattern: report-*
         merge-multiple: true
         path: merged-results
 
-    - name: 🧮 Check reports dowmloaded paths
-      run: |
-        echo "=== merged-results tree ==="
-        find merged-results -type f
+    - name: 🧮 Show merged-results content
+      run: find merged-results -type f
 
     - name: 🔧 Merge Playwright reports
       run: npx playwright merge-reports --reporter=html merged-results
