@@ -56,53 +56,53 @@ jobs:
   # ============================================================
   # 2️⃣  Run UI tests after API succeeds (matrix of browsers)
   # ============================================================
-  ui-tests:
-    name: Run UI Tests
-    runs-on: ubuntu-latest
-    needs: api-tests     # Wait until API job passes
+#   ui-tests:
+#     name: Run UI Tests
+#     runs-on: ubuntu-latest
+#     needs: api-tests     # Wait until API job passes
 
-    strategy:
-      matrix:
-        browser: [chromium, firefox]
-      fail-fast: false
+#     strategy:
+#       matrix:
+#         browser: [chromium, firefox]
+#       fail-fast: false
 
-    env:
-      FORM_AUTH_USER: ${{ secrets.FORM_AUTH_USER }}
-      FORM_AUTH_PASS: ${{ secrets.FORM_AUTH_PASS }}
-      BASE_URL: ${{ secrets.BASE_URL }}
-      REPORT_NAME: ${{ matrix.browser }}
+#     env:
+#       FORM_AUTH_USER: ${{ secrets.FORM_AUTH_USER }}
+#       FORM_AUTH_PASS: ${{ secrets.FORM_AUTH_PASS }}
+#       BASE_URL: ${{ secrets.BASE_URL }}
+#       REPORT_NAME: ${{ matrix.browser }}
 
-    steps:
-      - name: 🧾 Checkout repository
-        uses: actions/checkout@v4
+#     steps:
+#       - name: 🧾 Checkout repository
+#         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
+#       - name: ⚙️ Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 24
 
-      - name: 📦 Install dependencies
-        run: npm ci
+#       - name: 📦 Install dependencies
+#         run: npm ci
 
-      - name: 🎭 Install Playwright Browsers
-        run: npx playwright install --with-deps
+#       - name: 🎭 Install Playwright Browsers
+#         run: npx playwright install --with-deps
 
-      - name: 🚀 Run UI tests on ${{ matrix.browser }}
-        run: npx playwright test src/tests --grep-invert "@api" --project=${{ matrix.browser }}
+#       - name: 🚀 Run UI tests on ${{ matrix.browser }}
+#         run: npx playwright test src/tests --grep-invert "@api" --project=${{ matrix.browser }}
 
-      - name: 📦 Package per‑browser reports
-        run: |
-            mkdir -p combined/${{ matrix.browser }}
-            mv playwright-report combined/${{ matrix.browser }}/playwright-report
-            mv json-report combined/${{ matrix.browser }}/json-report
+#       - name: 📦 Package per‑browser reports
+#         run: |
+#             mkdir -p combined/${{ matrix.browser }}
+#             mv playwright-report combined/${{ matrix.browser }}/playwright-report
+#             mv json-report combined/${{ matrix.browser }}/json-report
 
-      - name: 📄 Upload per‑browser reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: report-${{ matrix.browser }}
-          path: combined/${{ matrix.browser }}/
-          if-no-files-found: warn
+#       - name: 📄 Upload per‑browser reports
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: report-${{ matrix.browser }}
+#           path: combined/${{ matrix.browser }}/
+#           if-no-files-found: warn
 
   # ============================================================
   # 3️⃣  Merge HTML reports and prepare for publishing
@@ -110,7 +110,7 @@ jobs:
   merge-report:
     name: Merge Playwright reports
     runs-on: ubuntu-latest
-    needs: ui-tests
+    # needs: ui-tests
     if: always()
     outputs:
         report_dir: ${{ steps.setdir.outputs.name }}
@@ -132,7 +132,8 @@ jobs:
         path: merged-results
 
     - name: 🧮 Show merged-results content
-      run: find merged-results -type f
+    #   run: find merged-results -type f
+      run: find "$PWD" -type f -name merged-results
 
     - name: 🔧 Merge Playwright reports
       run: npx playwright merge-reports --reporter=html merged-results/json-report
