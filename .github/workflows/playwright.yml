@@ -20,6 +20,7 @@ jobs:
       FORM_AUTH_USER: ${{ secrets.FORM_AUTH_USER }}
       FORM_AUTH_PASS: ${{ secrets.FORM_AUTH_PASS }}
       BASE_URL: ${{ secrets.BASE_URL }}
+      REPORT_NAME: api
 
     steps:
       - name: 🧾 Checkout repository
@@ -69,6 +70,7 @@ jobs:
       FORM_AUTH_USER: ${{ secrets.FORM_AUTH_USER }}
       FORM_AUTH_PASS: ${{ secrets.FORM_AUTH_PASS }}
       BASE_URL: ${{ secrets.BASE_URL }}
+      REPORT_NAME: ${{ matrix.browser }}
 
     steps:
       - name: 🧾 Checkout repository
@@ -126,7 +128,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         pattern: report-*
-        merge-multiple: false
+        merge-multiple: true
         path: merged-results
 
     - name: 🧮 Show merged-results content
