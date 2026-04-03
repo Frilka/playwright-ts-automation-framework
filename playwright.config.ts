@@ -6,9 +6,9 @@ import { ConfigManager } from './src/config/ConfigManager';
 
 dotenv.config();
 const htmlReportDir = path.resolve('playwright-report');
-const jsonReportDir = path.resolve('json-report');
-fs.mkdirSync(htmlReportDir, { recursive: true });
-fs.mkdirSync(jsonReportDir, { recursive: true });
+// const jsonReportDir = path.resolve('json-report');
+// fs.mkdirSync(htmlReportDir, { recursive: true });
+// fs.mkdirSync(jsonReportDir, { recursive: true });
 
 export default defineConfig({
   testDir: './src/tests',
@@ -23,8 +23,9 @@ export default defineConfig({
   },
   reporter: [
     ['list'], 
-    ['json', { outputFile: path.join(jsonReportDir, `results_${process.env.REPORT_NAME || 'default'}.json`) }],
-    ['html', { outputFolder: htmlReportDir, open: 'never' }],
+    // ['json', { outputFile: path.join(jsonReportDir, `results_${process.env.REPORT_NAME || 'default'}.json`) }],
+    ['html', { open: 'never' }],
+    ['blob', { fileName: `report_${process.env.REPORT_NAME || 'default'}.zip`}],
   ],
   outputDir: 'test-results/',
    /* Configure projects for major browsers */
