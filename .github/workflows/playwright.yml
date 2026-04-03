@@ -107,8 +107,8 @@ jobs:
 
     - name: 🧮 Check reports dowmload paths
       run: |
-        echo "Listing merged-results/"
-        ls -R merged-results || true
+        echo "=== merged-results tree ==="
+        find merged-results -type f
 
     - name: ⬇️ Download all browser reports
       uses: actions/download-artifact@v4
