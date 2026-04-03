@@ -135,7 +135,7 @@ jobs:
       run: find merged-results -type f
 
     - name: 🔧 Merge Playwright reports
-      run: npx playwright merge-reports --reporter=html merged-results
+      run: npx playwright merge-reports --reporter=html merged-results/json-report
 
     - name: 📦 Add timestamped folder
       run: |
