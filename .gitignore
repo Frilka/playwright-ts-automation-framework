@@ -2,9 +2,10 @@
 node_modules/
 
 # Playwright artifacts
-test-results/
-playwright-report/
 trace/
+test-results/
+json-report/
+playwright-report/
 
 # TypeScript build output
 dist/

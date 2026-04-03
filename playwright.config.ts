@@ -1,8 +1,14 @@
+import fs from 'fs';
+import path from 'path';
 import dotenv from 'dotenv';
 import { defineConfig, devices } from '@playwright/test';
 import { ConfigManager } from './src/config/ConfigManager';
 
 dotenv.config();
+const htmlReportDir = path.resolve('playwright-report');
+const jsonReportDir = path.resolve('json-report');
+fs.mkdirSync(htmlReportDir, { recursive: true });
+fs.mkdirSync(jsonReportDir, { recursive: true });
 
 export default defineConfig({
   testDir: './src/tests',
@@ -15,7 +21,12 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  reporter: [['html', { open: 'never' }]],
+  reporter: [
+    ['list'], 
+    ['json', { outputFile: path.join(jsonReportDir, 'results.json') }],
+    ['html', { outputFolder: htmlReportDir, open: 'never' }],
+  ],
+  outputDir: 'test-results/',
    /* Configure projects for major browsers */
   projects: [
     {
@@ -53,11 +64,4 @@ export default defineConfig({
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
 });

@@ -75,12 +75,25 @@ jobs:
       - name: 🚀 Run UI tests on ${{ matrix.browser }}
         run: npx playwright test src/tests --grep-invert "@api" --project=${{ matrix.browser }}
 
+      - name: 🧮 Check generated report paths
+        run: |
+            echo "Listing playwright-report/"
+            ls -R playwright-report || true
+            echo "Listing json-report/"
+            ls -R json-report || true
+            
+      - name: 🧮 Verify folders before upload
+        run: find . -maxdepth 2 -type f
+
       - name: 📄 Upload per‑browser reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: report-${{ matrix.browser }}
-          path: playwright-report/
+          path: |
+            playwright-report/
+            json-report/
+          if-no-files-found: warn
 
   # ============================================================
   # 3️⃣  Merge HTML reports and prepare for publishing
@@ -106,9 +119,9 @@ jobs:
       with:
         pattern: report-*
         merge-multiple: true
-        path: playwright-report
+        path: merged-results
     - name: 🔧 Merge Playwright reports
-      run: npx playwright merge-reports --reporter=html playwright-report
+      run: npx playwright merge-reports --reporter=html merged-results
     - name: 📦 Add timestamped folder
       run: |
         mkdir -p ${{ steps.setdir.outputs.name }}
