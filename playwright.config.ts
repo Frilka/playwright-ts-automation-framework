@@ -23,7 +23,6 @@ export default defineConfig({
   },
   reporter: [
     ['list'], 
-    // ['json', { outputFile: path.join(jsonReportDir, `results_${process.env.REPORT_NAME || 'default'}.json`) }],
     ['html', { open: 'never' }],
     ['blob', { fileName: `report_${process.env.REPORT_NAME || 'default'}.zip`}],
   ],

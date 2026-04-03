@@ -44,7 +44,6 @@ jobs:
         run: |
             mkdir -p combined/api
             mv playwright-report combined/api/playwright-report
-            # mv json-report combined/api/json-report
             mv blob-report combined/api/blob-report
       - name: 📄 Upload API test report artifact
         if: always()
@@ -95,7 +94,7 @@ jobs:
 #         run: |
 #             mkdir -p combined/${{ matrix.browser }}
 #             mv playwright-report combined/${{ matrix.browser }}/playwright-report
-#             mv json-report combined/${{ matrix.browser }}/json-report
+#             mv blob-report combined/${{ matrix.browser }}/blob-report
 
 #       - name: 📄 Upload per‑browser reports
 #         if: always()
@@ -132,10 +131,6 @@ jobs:
         merge-multiple: true
         path: merged-results
 
-    - name: 🧮 Show merged-results content
-    #   run: find merged-results -type f
-      run: realpath merged-results
-
     - name: 🔧 Merge Playwright reports
       run: npx playwright merge-reports --reporter=html merged-results/blob-report
 
@@ -163,19 +158,19 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-    # Download previously deployed Pages artifact (if any)
-    - name: ⬇️ Download previous site content
-      uses: actions/download-pages-artifact@v3
-      id: previous
-      continue-on-error: true
-      with:
-        path: site
-    # Bring in new reports artifact
-    - name: ⬇️ Download new reports artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: github-pages
-        path: site
+    # # Download previously deployed Pages artifact (if any)
+    # - name: ⬇️ Download previous site content
+    #   uses: actions/download-pages-artifact@v3
+    #   id: previous
+    #   continue-on-error: true
+    #   with:
+    #     path: site
+    # # Bring in new reports artifact
+    # - name: ⬇️ Download new reports artifact
+    #   uses: actions/download-artifact@v4
+    #   with:
+    #     name: github-pages
+    #     path: site
     # 🧹 Remove reports older than 7 days locally (no git)
     - name: 🧹 Cleanup old reports before deploy
       run: |
