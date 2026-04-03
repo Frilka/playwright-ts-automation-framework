@@ -110,7 +110,7 @@ jobs:
   merge-report:
     name: Merge Playwright reports
     runs-on: ubuntu-latest
-    needs: api-tests
+    needs: ui-tests
     if: always()
     outputs:
         report_dir: ${{ steps.setdir.outputs.name }}
