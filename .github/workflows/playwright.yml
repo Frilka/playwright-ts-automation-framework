@@ -133,7 +133,7 @@ jobs:
 
     - name: 🧮 Show merged-results content
     #   run: find merged-results -type f
-      run: find "$PWD" -type f -name merged-results
+      run: realpath merged-results
 
     - name: 🔧 Merge Playwright reports
       run: npx playwright merge-reports --reporter=html merged-results/json-report
