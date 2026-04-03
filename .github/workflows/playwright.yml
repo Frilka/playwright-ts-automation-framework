@@ -42,7 +42,7 @@ jobs:
 
       - name: 📦 Package API reports
         run: |
-            # mkdir -p combined/api
+            mkdir -p combined/api
             mv playwright-report combined/api/playwright-report
             # mv json-report combined/api/json-report
             mv blob-report combined/api/blob-report
