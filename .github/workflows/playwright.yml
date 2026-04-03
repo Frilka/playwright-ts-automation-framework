@@ -75,16 +75,6 @@ jobs:
       - name: 🚀 Run UI tests on ${{ matrix.browser }}
         run: npx playwright test src/tests --grep-invert "@api" --project=${{ matrix.browser }}
 
-      - name: 🧮 Check generated report paths
-        run: |
-            echo "Listing playwright-report/"
-            ls -R playwright-report || true
-            echo "Listing json-report/"
-            ls -R json-report || true
-            
-      - name: 🧮 Verify folders before upload
-        run: find . -maxdepth 2 -type f
-
       - name: 📄 Upload per‑browser reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -114,6 +104,12 @@ jobs:
         SHORT_SHA="${GITHUB_SHA::7}"
         DIR_NAME="reports/$(date +'%Y-%m-%d_%H-%M')_${SHORT_SHA}"
         echo "name=${DIR_NAME}" >> $GITHUB_OUTPUT
+
+    - name: 🧮 Check reports dowmload paths
+      run: |
+        echo "Listing merged-results/"
+        ls -R merged-results || true
+
     - name: ⬇️ Download all browser reports
       uses: actions/download-artifact@v4
       with:
