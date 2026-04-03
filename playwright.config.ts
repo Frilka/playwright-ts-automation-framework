@@ -1,14 +1,8 @@
-import fs from 'fs';
-import path from 'path';
 import dotenv from 'dotenv';
 import { defineConfig, devices } from '@playwright/test';
 import { ConfigManager } from './src/config/ConfigManager';
 
 dotenv.config();
-const htmlReportDir = path.resolve('playwright-report');
-// const jsonReportDir = path.resolve('json-report');
-// fs.mkdirSync(htmlReportDir, { recursive: true });
-// fs.mkdirSync(jsonReportDir, { recursive: true });
 
 export default defineConfig({
   testDir: './src/tests',
